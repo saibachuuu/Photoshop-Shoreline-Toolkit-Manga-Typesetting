@@ -1,0 +1,59 @@
+{
+  "manifestVersion": 5,
+  "id": "cc.usag.join.shoreline-toolkit",
+  "name": "Shoreline Toolkit",
+  "version": "1.0.0",
+  "main": "index.html",
+  "icons": [
+    {
+      "width": 64,
+      "height": 64,
+      "path": "images/icon.png",
+      "scale": [1],
+      "theme": ["dark", "darkest"]
+    }
+  ],
+  "entrypoints": [
+    {
+      "type": "panel",
+      "id": "mainPalette",
+      "minimumSize": {
+        "width": 230,
+        "height": 200
+      },
+      "maximumSize": {
+        "width": 2000,
+        "height": 2000
+      },
+      "preferredDockedSize": {
+        "width": 250,
+        "height": 500
+      },
+      "preferredFloatingSize": {
+        "width": 250,
+        "height": 500
+      },
+      "label": "Shoreline Tools",
+      "icons": [
+        {
+          "width": 32,
+          "height": 32,
+          "path": "images/icon.png",
+          "scale": [1, 2],
+          "theme": ["dark", "darkest", "light", "lightest"],
+          "species": ["panel"]
+        }
+      ]
+    }
+  ],
+  "host": {
+    "app": "PS",
+    "minVersion": "23.0.0"
+  },
+  "requiredPermissions": {
+    "localFileSystem": "fullAccess",
+    "network": {
+        "domains": "all"
+    }
+  }
+}

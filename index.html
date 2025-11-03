@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Shoreline Toolkit</title>
+  <script src="main.js"></script> 
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="container">
+    <h1 id="title" data-i18n="title">Shoreline Toolkit</h1>
+
+    <!-- Settings Button -->
+    <button class="tile settings-button" id="btnSettings">
+      <div class="thumb">⚙️</div>
+      <div class="label" data-i18n="settings">Settings</div>
+    </button>
+
+    <button class="tile" id="btnImageOutput">
+      <div class="thumb"></div>
+      <div class="label" data-i18n="imageOutput">Image Output</div>
+    </button>
+
+    <button class="tile" id="btnBatchOutput">
+      <div class="thumb"></div>
+      <div class="label" data-i18n="batchOutput">Batch Output</div>
+    </button>
+
+    <!-- Model Selection -->
+    <div class="model-selection">
+      <sp-label slot="label" data-i18n="selectModel">Select Model:</sp-label>
+      <sp-radio-group id="modelSelector">
+        <sp-radio value="gemini" checked data-i18n-label="modelGemini">Google Gemini</sp-radio>
+        <sp-radio value="flux" data-i18n-label="modelFlux">FLUX Kontext</sp-radio>
+      </sp-radio-group>
+    </div>
+    
+    <button class="tile" id="btnMojiRemove">
+      <div class="thumb"></div>
+      <div class="label" data-i18n="mojiRemove">Moji Remove</div>
+    </button>
+
+    <button class="tile" id="btnApplyResult" disabled>
+      <div class="thumb"></div>
+      <div class="label" data-i18n="applyResult">Apply Result</div>
+    </button>
+
+    <button class="tile force-stop-button" id="btnForceStop" disabled>
+      <div class="thumb">⛔</div>
+      <div class="label" data-i18n="forceStop">Force Stop</div>
+    </button>
+
+    <img src="https://thumbsnap.com/i/cGbdzS93.png" class="test-image" />
+
+    <div id="statusBar" data-i18n="ready">Ready</div>
+  </div>
+
+  <!-- Settings Dialog (hidden by default) -->
+  <dialog id="settingsDialog">
+    <form method="dialog">
+      <div class="settings-content">
+        <h2 data-i18n="settingsTitle">API Settings</h2>
+        <div class="scroll-wrapper">
+          <div class="settings-section">
+            <h3 data-i18n="commonSettings">Common Settings</h3>
+            <sp-label data-i18n="prompt">Prompt:</sp-label>
+            <sp-textfield id="sharedPrompt" placeholder="e.g., Remove text from image"></sp-textfield>
+          </div>
+          <div class="settings-section">
+            <h3 data-i18n="geminiSettings">Google Gemini</h3>
+            <sp-label data-i18n="endpoint">Endpoint:</sp-label>
+            <sp-textfield id="geminiEndpoint" placeholder="https://..."></sp-textfield>
+            
+            <sp-label data-i18n="apiKey">API Key:</sp-label>
+            <sp-textfield id="geminiApiKey" placeholder="Enter API key"></sp-textfield>
+
+            <h3 data-i18n="fluxSettings">FLUX Kontext</h3>
+            <sp-label data-i18n="endpoint">Endpoint:</sp-label>
+            <sp-textfield id="fluxEndpoint" placeholder="https://api.together.xyz/v1/images/generations"></sp-textfield>
+            
+            <sp-label data-i18n="apiKey">API Key:</sp-label>
+            <sp-textfield id="fluxApiKey" placeholder="Enter API key"></sp-textfield>
+
+            <sp-label data-i18n="steps">Steps:</sp-label>
+            <sp-textfield id="fluxSteps" type="number" value="20"></sp-textfield>
+
+            <sp-label data-i18n="guidanceScale">Guidance Scale:</sp-label>
+            <sp-textfield id="fluxGuidanceScale" type="number" value="3.0" step="0.1"></sp-textfield>
+          </div>
+
+          <div class="settings-buttons">
+            <sp-button variant="secondary" id="btnCancelSettings" data-i18n="cancel">Cancel</sp-button>
+            <sp-button variant="primary" id="btnSaveSettings" data-i18n="save">Save</sp-button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </dialog>
+</body>
+</html>

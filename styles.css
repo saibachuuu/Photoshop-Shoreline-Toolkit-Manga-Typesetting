@@ -1,0 +1,241 @@
+:root {
+  --bg-color: #333;
+  --panel-bg-color: #2e2e2e;
+  --border-color: #555;
+  --text-color: #eee;
+  --text-light-color: #aaa;
+  --button-bg-color: #444;
+  --button-hover-bg-color: #555;
+  --button-active-bg-color: #666;
+  --thumb-placeholder-color: #777;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100%;
+}
+
+.container {
+  padding: 10px;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+h1#title {
+  font-size: 1.5em;
+  color: var(--text-color);
+  margin-bottom: 15px;
+  text-align: center;
+  font-weight: normal;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+  margin-bottom: 15px;
+  flex-grow: 1;
+  align-content: start;
+}
+
+.tile {
+  background-color: var(--button-bg-color);
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+  min-height: 20px; /* Reduced height */
+  color: var(--text-color);
+  font-size: 0.9em;
+  line-height: 1.2;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+.tile:hover {
+  background-color: var(--button-hover-bg-color);
+  border-color: var(--text-light-color);
+}
+
+.tile:active {
+  background-color: var(--button-active-bg-color);
+  border-color: var(--text-color);
+}
+
+.thumb {
+  width: 32px;   /* Reduced size */
+  height: 32px;  /* Reduced size */
+  background-color: var(--thumb-placeholder-color);
+  border-radius: 5px;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+}
+
+
+
+.test-image {
+  height: 40px; /* Reduced height */
+  width: auto;
+  object-fit: contain;
+  margin-top: 10px;
+  border-radius: 4px;
+  opacity: 0.5;
+}
+
+#statusBar {
+  background-color: var(--panel-bg-color);
+  border-top: 1px solid var(--border-color);
+  padding: 8px 10px;
+  font-size: 0.8em;
+  color: var(--text-light-color);
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* Dialog Styles */
+dialog {
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  padding: 0;
+  max-width: 450px;
+  width: 90%;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+  max-height: 85vh;  /* 改为最大高度 */
+  display: flex;
+  flex-direction: column;
+}
+
+dialog::backdrop {
+  background-color: rgba(0, 0, 0, 0.6);
+}
+
+.settings-content {
+  padding: 15px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  /* 移除固定高度 */
+  min-height: 0;  /* 关键：允许 flex 子元素收缩 */
+  flex: 1;        /* 填充对话框剩余空间 */
+}
+
+.settings-content h2 {
+  margin: 0 0 10px 0;
+  text-align: center;
+  font-size: 1.2em;
+  font-weight: normal;
+}
+
+.settings-content h3 {
+  margin: 0 0 8px 0;
+  font-size: 1em;
+  font-weight: bold;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 5px;
+}
+
+.settings-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.settings-section sp-label {
+  font-size: 0.9em;
+  margin-top: 4px;
+}
+
+.settings-buttons {
+  flex-shrink: 0;
+  padding: 15px;
+  border-top: 1px solid var(--border-color);
+  /* Remove any margin that might push buttons off-screen */
+  margin: 0;
+  position: relative;  /* Ensure it stays on top of scroll area */
+  background-color: var(--bg-color);  /* Match background */
+}
+
+.model-selection {
+  padding: 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+  margin-bottom: 10px;
+  background-color: var(--button-bg-color);
+}
+.model-selection sp-radio-group {
+  display: flex;
+  gap: 20px;
+  margin-top: 5px;
+}
+
+.settings-content {
+  display: flex;
+  flex-direction: column;
+  /* 限制整个内容区域的高度，例如视窗高度的80% */
+  height: 80vh; 
+}
+
+.scroll-wrapper {
+  /* 关键：这三行确保滚动条正常工作 */
+  flex: 1;
+  min-height: 0;  /* 必须有，否则 flex 布局中滚动条失效 */
+  overflow-y: auto;
+  padding: 0 15px;
+}
+
+.settings-buttons {
+  flex-shrink: 0;
+  padding: 15px;
+  border-top: 1px solid #333;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.force-stop-button {
+  background-color: #5a2424;
+}
+
+.force-stop-button:hover {
+  background-color: #7a3030;
+}
+
+.force-stop-button:active {
+  background-color: #943a3a;
+}
+
+.force-stop-button:disabled {
+  background-color: var(--button-bg-color);
+  opacity: 0.5;
+  cursor: not-allowed;
+}

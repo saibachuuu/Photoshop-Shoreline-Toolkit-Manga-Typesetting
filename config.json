@@ -1,0 +1,33 @@
+{
+  "host": "127.0.0.1",
+  "port": 8080,
+  "gemini_endpoint": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent",
+  "gemini_api_key": "",
+  "flux_endpoint": "https://api.together.xyz/v1/images/generations",
+  "flux_api_key": "",
+  "max_flux_dimension": 1792,
+
+  "admin_host": "127.0.0.1",
+  "admin_port": 8081,
+
+  "enable_border": true,
+  "border_color": [127, 127, 127],
+  "border_ratio": 0.05,
+
+  "enable_alignment": true,
+
+  "debug_mode": true,
+  "debug_max_matches_viz": 100,
+
+  "max_features": 5000,
+  "lowe_ratio_threshold": 0.70,
+  "ransac_threshold": 5.0,
+  "min_matches_required": 4,
+
+  "orb_scale_factor": 1.2,
+  "orb_nlevels": 8,
+  "orb_edge_threshold": 31,
+  "orb_wta_k": 2,
+  "orb_patch_size": 31,
+  "orb_score_type": "HARRIS_SCORE"
+}
