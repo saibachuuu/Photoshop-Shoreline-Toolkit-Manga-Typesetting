@@ -8,7 +8,7 @@ let API_CONFIG = {
   fluxApiKey: "",
   fluxSteps: "20",
   fluxGuidanceScale: "2.5",
-  prompt: "Remove the stylized Japanest text."
+  prompt: "Remove the stylized Japanese text."
 };
 
 
