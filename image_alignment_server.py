@@ -15,6 +15,7 @@ import uuid
 import hashlib
 import threading
 from urllib.parse import parse_qs, urlparse
+import time
 
 
 
@@ -555,9 +556,8 @@ def detect_request_type_from_body(data):
     """
     if 'contents' in data:
         return 'gemini'
-    elif 'model' in data and 'FLUX' in data.get('model', ''):
+    else:
         return 'flux'
-    return None
 
 
 
@@ -654,19 +654,14 @@ def handle_flux_request(data, orig_path):
     except (ValueError, TypeError):
         raise ValueError('Invalid FLUX request: steps must be a positive integer')
 
-
     if 'image_url' not in data or not data['image_url'].startswith('data:image/'):
         raise ValueError('Invalid FLUX request')
-
-
 
     original_b64 = data['image_url'].split(',', 1)[1]
     debug_print(f"Original image base64 length: {len(original_b64)}")
     
     with open(orig_path, 'wb') as f:
         f.write(base64.b64decode(original_b64))
-
-
 
     orig_img = cv2.imread(orig_path)
     debug_print(f"Loaded original image: {orig_img.shape[1]}x{orig_img.shape[0]}")
@@ -678,36 +673,24 @@ def handle_flux_request(data, orig_path):
     )
     save_debug_image(bordered_img, "01_bordered_original")
 
-
-
     bordered_path = tempfile.mktemp(suffix='.png')
     cv2.imwrite(bordered_path, bordered_img)
     target_upscale_height = pre_scaled_dims[1]
     debug_print(f"Target upscale height: {target_upscale_height}")
 
-
-
     bordered_height, bordered_width = bordered_img.shape[:2]
     with open(bordered_path, 'rb') as f:
         bordered_b64 = base64.b64encode(f.read()).decode('utf-8')
 
-
-
     data.update({
         'image_url': f"data:image/png;base64,{bordered_b64}",
-        'width': bordered_width,
-        'height': bordered_height
     })
-
-
 
     debug_print(f"Forwarding request to FLUX API: {config['flux_endpoint']}")
     debug_print(f"Request image dimensions: {bordered_width}x{bordered_height}")
-    headers = {"Authorization": f"Bearer {config['flux_api_key']}", "Content-Type": "application/json"}
+    headers = {"Authorization": f"Key {config['flux_api_key']}", "Content-Type": "application/json"}
     response = requests.post(config['flux_endpoint'], headers=headers, json=data)
     os.unlink(bordered_path)
-
-
 
     if response.status_code != 200:
         debug_print(f"FLUX API returned status {response.status_code}")
@@ -719,26 +702,43 @@ def handle_flux_request(data, orig_path):
             print(response.text)
         raise Exception(f"FLUX API Error {response.status_code}")
 
-
-
+    # New logic
     api_data = response.json()
     debug_print(f"FLUX API response keys: {list(api_data.keys())}")
-    
-    if 'data' not in api_data or not api_data['data']:
+
+    request_id = api_data.get("request_id")
+    if not request_id:
         debug_print(f"FLUX API response JSON: {json.dumps(api_data, indent=2)}")
-        raise Exception('No image in FLUX response')
+        raise Exception('No request_id in FLUX response')
 
+    status_url = f"https://queue.fal.run/fal-ai/flux-kontext/requests/{request_id}/status"
+    status_headers = {"Authorization": f"Key {config['flux_api_key']}"}
+    while True:
+        status_resp = requests.get(status_url, headers=status_headers)
+        status_json = status_resp.json()
+        debug_print(f"Status polling: {json.dumps(status_json, indent=2)}")
+        if status_json.get("status") == "COMPLETED":
+            response_url = status_json.get("response_url")
+            if not response_url:
+                raise Exception("No response_url in status response")
+            break
+        time.sleep(2)
 
+    response_resp = requests.get(response_url, headers=status_headers)
+    response_json = response_resp.json()
+    debug_print(f"Response polling: {json.dumps(response_json, indent=2)}")
 
-    image_url = api_data['data'][0]['url']
+    images = response_json.get("images")
+    if not images or not isinstance(images, list) or not images[0].get("url"):
+        raise Exception("No image url found in response")
+
+    image_url = images[0]["url"]
     debug_print(f"Downloaded image URL: {image_url[:80]}...")
-    
-    image_response = requests.get(image_url)
+
+    image_response = requests.get(image_url, headers=status_headers)
     if not image_response.ok:
         debug_print(f"Image download failed: {image_response.status_code}")
         raise Exception(f"Failed to download FLUX result")
-
-
 
     result_b64 = base64.b64encode(image_response.content).decode('utf-8')
     return api_data, result_b64, None, target_upscale_height
@@ -755,20 +755,16 @@ def handle_flux_request(data, orig_path):
 class APIRequestHandler(BaseHTTPRequestHandler):
     """Handler for API port (Port A) - client requests"""
 
-
     def do_POST(self):
         if self.path != '/':
             return self.send_error(404)
-
 
         try:
             content_length = int(self.headers.get('Content-Length', 0))
             if content_length == 0:
                 return self.send_error(400, 'No content')
 
-
             request_data = json.loads(self.rfile.read(content_length))
-
 
             # Step 1: Detect request type from headers first
             request_type = detect_request_type_from_headers(self.headers)
@@ -776,9 +772,7 @@ class APIRequestHandler(BaseHTTPRequestHandler):
                 print("[AUTH] Could not detect request type from headers")
                 return self.send_error(400, 'Invalid request type')
 
-
             print(f"[AUTH] Detected request type: {request_type.upper()}")
-
 
             # Step 2: Extract API key from headers based on detected type
             api_key = extract_api_key_from_headers(self.headers, request_type)
@@ -786,17 +780,14 @@ class APIRequestHandler(BaseHTTPRequestHandler):
                 print(f"[AUTH] No API key found in {request_type.upper()} headers")
                 return self.send_error(401, f'No API key in {request_type.upper()} request')
 
-
             # Step 3: Verify API key
             is_valid, message = verify_api_key(api_key)
             if not is_valid:
                 print(f"[AUTH] API key verification failed: {message}")
                 return self.send_error(401, message)
 
-
             print(f"[AUTH] Valid API key accepted")
             record_api_usage(api_key) # Record successful, authenticated request
-
 
             # Step 4: Verify request body matches detected type
             body_request_type = detect_request_type_from_body(request_data)
@@ -804,27 +795,31 @@ class APIRequestHandler(BaseHTTPRequestHandler):
                 print(f"[VALIDATION] Request type mismatch: headers say {request_type}, body says {body_request_type}")
                 return self.send_error(400, 'Request type mismatch between headers and body')
 
-
             print(f"[API] Processing {request_type.upper()} request")
-
 
             orig_path = result_path = aligned_path = None
             try:
                 with tempfile.NamedTemporaryFile(suffix='.png', delete=False) as f:
                     orig_path = f.name
 
-
                 if request_type == 'gemini':
                     api_data, result_b64, parts, target_height = handle_gemini_request(request_data, orig_path)
                 else:
-                    api_data, result_b64, parts, target_height = handle_flux_request(request_data, orig_path)
-
+                    # new API
+                    api_data_fal, result_b64, parts, target_height = handle_flux_request(request_data, orig_path)
+                    # transfer to old API
+                    api_data_together = {
+                        "data": [
+                            {
+                                "url": f"data:image/png;base64,{result_b64}"
+                            }
+                        ]
+                    }
 
                 result_bytes = base64.b64decode(result_b64)
                 result_img = cv2.imdecode(np.frombuffer(result_bytes, np.uint8), cv2.IMREAD_COLOR)
                 if result_img is None:
                     raise Exception('Failed to decode result')
-
 
                 debug_print(f"Decoded result image: {result_img.shape[1]}x{result_img.shape[0]}")
                 save_debug_image(result_img, "02_result_raw")
@@ -832,23 +827,18 @@ class APIRequestHandler(BaseHTTPRequestHandler):
                 result_img = upscale_to_match_height(result_img, target_height)
                 save_debug_image(result_img, "03_result_upscaled")
 
-
                 with tempfile.NamedTemporaryFile(suffix='.png', delete=False) as f:
                     result_path = f.name
                 cv2.imwrite(result_path, result_img)
-
 
                 aligned_path = tempfile.mktemp(suffix='.png')
                 if not align_images_orb(orig_path, result_path, aligned_path):
                     raise Exception('Alignment failed')
 
-
                 with open(aligned_path, 'rb') as f:
                     aligned_b64 = base64.b64encode(f.read()).decode('utf-8')
 
-
                 save_debug_image(cv2.imread(aligned_path), "04_final_aligned")
-
 
                 if request_type == 'gemini':
                     for p in parts:
@@ -856,26 +846,26 @@ class APIRequestHandler(BaseHTTPRequestHandler):
                             p['inlineData']['data'] = aligned_b64
                             break
                 else:
-                    api_data['data'][0]['url'] = f"data:image/png;base64,{aligned_b64}"
-
+                    # Translate to Together API format
+                    api_data_together['data'][0]['url'] = f"data:image/png;base64,{aligned_b64}"
 
             finally:
                 for path in [orig_path, result_path, aligned_path]:
                     if path and os.path.exists(path):
                         os.unlink(path)
 
-
             self.send_response(200)
             self.send_header('Content-Type', 'application/json')
             self.end_headers()
-            self.wfile.write(json.dumps(api_data).encode('utf-8'))
+            if request_type == 'gemini':
+                self.wfile.write(json.dumps(api_data).encode('utf-8'))
+            else:
+                self.wfile.write(json.dumps(api_data_together).encode('utf-8'))
             print(f"[API] {request_type.upper()} request completed successfully\n")
-
 
         except Exception as e:
             print(f"[API] Error: {e}")
             self.send_error(500, str(e))
-
 
     def log_message(self, format, *args):
         pass

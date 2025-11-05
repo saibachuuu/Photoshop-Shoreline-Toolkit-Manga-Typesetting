@@ -132,7 +132,6 @@ async function getSelectionAsBase64() {
   await tempDoc.closeWithoutSaving();
   await tempFile.delete();
   
-  // 切回原文档
   app.activeDocument = doc;
 
   return { base64, width, height, resolution: doc.resolution, bounds };
@@ -171,7 +170,7 @@ async function sendToGemini(base64Image) {
     }]
   };
 
-  // 创建中断控制器
+  // Create abort controller
   processingState.abortController = new AbortController();
 
   const response = await fetch(settings.geminiEndpoint, {
@@ -234,7 +233,6 @@ async function sendToFlux(base64Image, width, height) {
     image_url: imageUrl
   };
 
-  // 创建中断控制器
   processingState.abortController = new AbortController();
 
   const response = await fetch(settings.fluxEndpoint, {
@@ -297,7 +295,6 @@ async function handleMojiRemove() {
     const modelName = selectedModel === "gemini" ? "Gemini" : "FLUX";
     updateStatus(t("processingWithModel").replace("{modelName}", modelName).replace("{docName}", selectionData.docName));
     
-    // 启用 Force Stop 按钮
     setForceStopButtonState(true);
     
     const resultBase64 = await (selectedModel === "gemini" 
