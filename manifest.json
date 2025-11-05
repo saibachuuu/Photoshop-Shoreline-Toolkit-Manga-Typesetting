@@ -2,7 +2,7 @@
   "manifestVersion": 5,
   "id": "cc.usag.join.shoreline-toolkit",
   "name": "Shoreline Toolkit",
-  "version": "1.0.1",
+  "version": "1.0.0",
   "main": "index.html",
   "icons": [
     {

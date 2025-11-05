@@ -3,7 +3,7 @@
   "port": 8080,
   "gemini_endpoint": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent",
   "gemini_api_key": "",
-  "flux_endpoint": "https://api.together.xyz/v1/images/generations",
+  "flux_endpoint": "https://queue.fal.run/fal-ai/flux-kontext/dev",
   "flux_api_key": "",
   "max_flux_dimension": 1792,
 

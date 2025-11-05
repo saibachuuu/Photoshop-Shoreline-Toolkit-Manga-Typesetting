@@ -682,9 +682,20 @@ def handle_flux_request(data, orig_path):
     with open(bordered_path, 'rb') as f:
         bordered_b64 = base64.b64encode(f.read()).decode('utf-8')
 
+    # Update image_url and set required fields
     data.update({
         'image_url': f"data:image/png;base64,{bordered_b64}",
+        'num_image': 1,
+        'enable_safety_checker': False,
+        'resolution_mode': 'match_input',
+        'output_format': 'jpeg',
+        'acceleration': 'none'
     })
+    # Remove unwanted fields if present
+    data.pop('n', None)
+    data.pop('disable_safety_checker', None)
+    data.pop('width', None)
+    data.pop('height', None)
 
     debug_print(f"Forwarding request to FLUX API: {config['flux_endpoint']}")
     debug_print(f"Request image dimensions: {bordered_width}x{bordered_height}")
