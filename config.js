@@ -4,11 +4,11 @@
 let API_CONFIG = {
   geminiEndpoint: "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent",
   geminiApiKey: "",
-  fluxEndpoint: "https://api.together.xyz/v1/images/generations",
+  fluxEndpoint: "https://queue.fal.run/fal-ai/flux-kontext/dev",
   fluxApiKey: "",
   fluxSteps: "20",
   fluxGuidanceScale: "2.5",
-  prompt: "extend the content to the border, remove Japanest text."
+  prompt: "Remove the stylized Japanest text."
 };
 
 

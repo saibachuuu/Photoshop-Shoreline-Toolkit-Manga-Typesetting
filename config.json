@@ -10,7 +10,7 @@
   "admin_host": "127.0.0.1",
   "admin_port": 8081,
 
-  "enable_border": true,
+  "enable_border": false,
   "border_color": [127, 127, 127],
   "border_ratio": 0.05,
 
