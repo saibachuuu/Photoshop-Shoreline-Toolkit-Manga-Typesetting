@@ -170,7 +170,6 @@ async function sendToGemini(base64Image) {
     }]
   };
 
-  // Create abort controller
   processingState.abortController = new AbortController();
 
   const response = await fetch(settings.geminiEndpoint, {
@@ -222,15 +221,20 @@ async function sendToFlux(base64Image, width, height) {
   const validHeight = roundToMultipleOf8(Math.min(Math.max(height, 256), 1440));
 
   const requestBody = {
-    model: "black-forest-labs/FLUX.1-kontext-dev",
+    //model: "black-forest-labs/FLUX.1-kontext-dev",
     prompt: prompt,
-    n: 1,
-    width: validWidth,
-    height: validHeight,
+    //n: 1,
+    num_images: 1,
+    //width: validWidth,
+    //height: validHeight,
     steps: steps,
+    //num_inference_steps: steps,
     guidance_scale: guidance_scale,
-    disable_safety_checker: true,
-    image_url: imageUrl
+    enable_safety_checker: false,
+    image_url: imageUrl, 
+    output_format: "jpeg",
+    acceleration: "none",
+    resolution_mode: "match_input"
   };
 
   processingState.abortController = new AbortController();
